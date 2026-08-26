@@ -1,66 +1,82 @@
 local Kavo = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Kavo.CreateLib("Evade Scanner - By Ryna", "DarkTheme")
+local Window = Kavo.CreateLib("Evade Hub [BETA] - By Ryna", "DarkTheme")
 
-local LocalPlayer = game:GetService("Players").LocalPlayer
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local DebugTab = Window:NewTab("Scanner")
-local DebugSection = DebugTab:NewSection("Pindai Objek Evade")
+-- TAB COSMETICS
+local CosmeticTab = Window:NewTab("Cosmetics")
+local CosmeticSection = CosmeticTab:NewSection("Client-Side Visuals")
 
--- Notifikasi Layar Biar Langsung Kelihatan Hasilnya
-local function notify(title, text)
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = title,
-        Text = text,
-        Duration = 5
-    })
-end
-
--- SCAN 1: Pindai Character
-DebugSection:NewButton("Scan Character Player", "Cari letak part avatar", function()
-    local char = LocalPlayer.Character
-    if not char then
-        notify("Scanner Error", "Karakter tidak ditemukan! Masuk match dulu.")
-        return
-    end
-
-    local count = 0
-    print("================== [ SCAN CHARACTER ] ==================")
-    for _, v in ipairs(char:GetDescendants()) do
-        if v:IsA("BasePart") or v:IsA("MeshPart") then
-            count = count + 1
-            print("Part: " .. v.Name .. " | Parent: " .. v.Parent.Name .. " | Trans: " .. tostring(v.Transparency))
-        end
-    end
-    notify("Scan Character Selesai", "Ditemukan " .. tostring(count) .. " part di avatar.")
-end)
-
--- SCAN 2: Pindai Viewmodel/Rig khusus Evade di Workspace
-DebugSection:NewButton("Scan Viewmodel In-Game", "Cari model rahasia Evade", function()
-    local foundModels = {}
-    print("================== [ SCAN WORKSPACE ] ==================")
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") then
-            local name = obj.Name:lower()
-            if name:find("character") or name:find("view") or name:find("rig") or name:find(LocalPlayer.Name:lower()) then
-                table.insert(foundModels, obj.Name)
-                print("Model Ditemukan: " .. obj:GetFullName())
+-- FAKE HEADLESS (Menyasar Workspace.Rigs & ViewModel)
+CosmeticSection:NewButton("Fake Headless", "Hilangkan kepala dari Rig Evade", function()
+    pcall(function()
+        -- 1. Scan di Workspace.Rigs
+        if workspace:FindFirstChild("Rigs") then
+            for _, rig in pairs(workspace.Rigs:GetChildren()) do
+                if rig.Name:find(LocalPlayer.Name) or rig:FindFirstChild("Head") then
+                    if rig:FindFirstChild("Head") then
+                        rig.Head.Transparency = 1
+                        for _, child in pairs(rig.Head:GetChildren()) do
+                            if child:IsA("Decal") or child:IsA("SpecialMesh") then
+                                child:Destroy()
+                            end
+                        end
+                    end
+                end
             end
         end
-    end
 
-    if #foundModels > 0 then
-        notify("Viewmodel Ditemukan!", "Cek F9 untuk list model: " .. table.concat(foundModels, ", "))
-    else
-        notify("Scan Workspace", "Tidak ada model viewmodel khusus yang terdeteksi.")
-    end
+        -- 2. Scan di Camera ViewModel
+        if workspace.CurrentCamera:FindFirstChild("ViewModel") then
+            local vm = workspace.CurrentCamera.ViewModel
+            if vm:FindFirstChild("Head") then
+                vm.Head.Transparency = 1
+            end
+        end
+    end)
 end)
 
--- TAB UTILITY
+-- FAKE KORBLOX (Menyasar Workspace.Rigs)
+CosmeticSection:NewButton("Fake Korblox", "Hilangkan kaki kanan dari Rig Evade", function()
+    pcall(function()
+        if workspace:FindFirstChild("Rigs") then
+            for _, rig in pairs(workspace.Rigs:GetChildren()) do
+                if rig.Name:find(LocalPlayer.Name) or rig:FindFirstChild("Humanoid") then
+                    for _, part in pairs(rig:GetDescendants()) do
+                        local name = part.Name:lower()
+                        if name:find("rightlowerleg") or name:find("rightupperleg") or name:find("rightfoot") or name:find("right leg") then
+                            if part:IsA("BasePart") then
+                                part.Transparency = 1
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end)
+
+-- TAB MAIN
 local MainTab = Window:NewTab("Main")
-local MainSection = MainTab:NewSection("Player Modifiers")
+local MainSection = MainTab:NewSection("Utilities")
 
 MainSection:NewSlider("WalkSpeed", "Atur kecepatan lari", 120, 16, function(s)
     pcall(function()
         LocalPlayer.Character.Humanoid.WalkSpeed = s
     end)
+end)
+
+MainSection:NewSlider("FOV", "Atur jarak pandang", 120, 70, function(s)
+    workspace.CurrentCamera.FieldOfView = s
+end)
+
+-- TAB CREDITS
+local CreditTab = Window:NewTab("Credits")
+local CreditSection = CreditTab:NewSection("Developer & Socials")
+CreditSection:NewLabel("Developer: Ryna")
+CreditSection:NewLabel("Status: BETA")
+CreditSection:NewLabel("Discord ID: 1123965322236526625")
+CreditSection:NewButton("Copy Discord Link", "Salin invite link", function()
+    setclipboard("https://discord.gg/2TgBkAA3kv")
 end)
