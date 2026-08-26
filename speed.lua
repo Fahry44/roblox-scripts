@@ -37,7 +37,7 @@ CosmeticSection:NewButton("Fake Headless", "Hilangkan kepala dari Rig Evade", fu
     end)
 end)
 
--- FAKE KORBLOX (Menyasar Workspace.Rigs)
+-- FAKE KORBLOX (Fix Target Workspace.Rigs)
 CosmeticSection:NewButton("Fake Korblox", "Hilangkan kaki kanan dari Rig Evade", function()
     pcall(function()
         if workspace:FindFirstChild("Rigs") then
@@ -48,6 +48,10 @@ CosmeticSection:NewButton("Fake Korblox", "Hilangkan kaki kanan dari Rig Evade",
                         if name:find("rightlowerleg") or name:find("rightupperleg") or name:find("rightfoot") or name:find("right leg") then
                             if part:IsA("BasePart") then
                                 part.Transparency = 1
+                                part.Size = Vector3.new(0, 0, 0)
+                            end
+                            if part:IsA("SpecialMesh") or part:IsA("MeshPart") then
+                                part.TextureID = ""
                             end
                         end
                     end
@@ -56,7 +60,6 @@ CosmeticSection:NewButton("Fake Korblox", "Hilangkan kaki kanan dari Rig Evade",
         end
     end)
 end)
-
 -- TAB MAIN
 local MainTab = Window:NewTab("Main")
 local MainSection = MainTab:NewSection("Utilities")
