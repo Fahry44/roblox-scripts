@@ -12,26 +12,39 @@ game:GetService("StarterGui"):SetCore("SendNotification", {
 local CosmeticTab = Window:NewTab("Cosmetics")
 local CosmeticSection = CosmeticTab:NewSection("Client-Side Visuals")
 
+-- Fake Korblox
 CosmeticSection:NewButton("Fake Korblox", "Hilangkan kaki kanan", function()
     pcall(function()
         local char = game.Players.LocalPlayer.Character
         if char then
-            for _, v in pairs(char:GetChildren()) do
-                if v.Name:find("RightLowerLeg") or v.Name:find("RightUpperLeg") or v.Name:find("RightFoot") then
-                    v.Transparency = 1
+            for _, v in pairs(char:GetDescendants()) do
+                if v.Name:find("RightLowerLeg")
+                    or v.Name:find("RightUpperLeg")
+                    or v.Name:find("RightFoot") then
+
+                    if v:IsA("BasePart") then
+                        v.Transparency = 1
+                    elseif v:IsA("SpecialMesh") or v:IsA("MeshPart") then
+                        v.MeshId = ""
+                    end
                 end
             end
         end
     end)
 end)
 
+-- Fake Headless
 CosmeticSection:NewButton("Fake Headless", "Hilangkan kepala", function()
     pcall(function()
         local char = game.Players.LocalPlayer.Character
+
         if char and char:FindFirstChild("Head") then
             char.Head.Transparency = 1
-            if char.Head:FindFirstChildOfClass("Decal") then
-                char.Head:FindFirstChildOfClass("Decal").Transparency = 1
+
+            for _, child in pairs(char.Head:GetChildren()) do
+                if child:IsA("Decal") or child:IsA("SpecialMesh") then
+                    child:Destroy()
+                end
             end
         end
     end)
@@ -41,14 +54,21 @@ end)
 local MainTab = Window:NewTab("Main")
 local MainSection = MainTab:NewSection("Player Modifiers")
 
+-- WalkSpeed
 MainSection:NewSlider("WalkSpeed", "Atur kecepatan lari", 120, 16, function(s)
     pcall(function()
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+        local char = game.Players.LocalPlayer.Character
+        if char and char:FindFirstChildOfClass("Humanoid") then
+            char:FindFirstChildOfClass("Humanoid").WalkSpeed = s
+        end
     end)
 end)
 
+-- FOV
 MainSection:NewSlider("FOV", "Atur jarak pandang", 120, 70, function(s)
-    workspace.CurrentCamera.FieldOfView = s
+    pcall(function()
+        workspace.CurrentCamera.FieldOfView = s
+    end)
 end)
 
 -- TAB 3: CREDITS
@@ -60,10 +80,13 @@ CreditSection:NewLabel("Status: BETA")
 CreditSection:NewLabel("Discord ID: 1123965322236526625")
 
 CreditSection:NewButton("Copy Discord Link", "Salin invite link", function()
-    setclipboard("https://discord.gg/2TgBkAA3kv")
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Copied!",
-        Text = "Link Discord berhasil disalin.",
-        Duration = 3
-    })
+    pcall(function()
+        setclipboard("https://discord.gg/2TgBkAA3kv")
+
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Copied!",
+            Text = "Link Discord berhasil disalin.",
+            Duration = 3
+        })
+    end)
 end)
